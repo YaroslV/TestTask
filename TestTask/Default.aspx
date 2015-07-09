@@ -10,8 +10,10 @@
         <asp:TextBox ID="textBoxID" runat="server" Width="109px"></asp:TextBox>
 
         <asp:Button ID="ButtonFind" runat="server" Height="35px" OnClick="Button1_Click" Text="Find" Width="52px" />
-
         <br/>
+        <asp:Label ID="TitleFNameLName" runat="server" Font-Bold="True" Font-Size="Medium"></asp:Label>
+        <br />
+        <br />
         <asp:Label ID="Label1" runat="server" Text="Title"></asp:Label>
         <asp:TextBox ID="textBoxTitle" runat="server" Width="109px"></asp:TextBox>  
         <br />

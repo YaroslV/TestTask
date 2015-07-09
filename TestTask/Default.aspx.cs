@@ -7,6 +7,7 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Configuration;
+using System.Text;
 
 namespace TestTask
 {
@@ -27,7 +28,7 @@ namespace TestTask
             dAdapt.Fill(ds, tableName1);
             
             dAdapt = new SqlDataAdapter(
-                "select * from PhoneNumbers",
+                "select * from PhoneNumbers join PhoneTypes on PhoneNumbers.PhoneTypeID = PhoneTypes.PhoneTypeID",
                 connString);
 
             dAdapt.Fill(ds, tableName2);          
@@ -53,44 +54,58 @@ namespace TestTask
             DataRow[] rowsWithPhone = phoneDTable.Select(string.Format("MemberId = {0}", memberId));
 
             DataRow[] rows = dt.Select(string.Format("MemberId = {0}",memberId));
-            if (rows.Length != 0 && rowsWithPhone.Length != 0)
+
+            StringBuilder labelText = new StringBuilder();
+            if (rows.Length != 0)
             {
+                var title = rows[0]["Title"];
+                if (title is System.DBNull)
+                {
+                    this.textBoxTitle.Text = "No Title";
+                }
+                else
+                {
+                    this.textBoxTitle.Text = (string)title;
+                    labelText.Append((string)title);
+                    labelText.Append(" ");
+                }
+
+
                 var fName = rows[0]["FirstName"];
                 if (fName is System.DBNull)
+                {
                     this.textBoxFirstName.Text = "No First Name";
+                }
                 else
+                {
                     this.textBoxFirstName.Text = (string)fName;
-
+                    labelText.Append((string)fName);
+                    labelText.Append(" ");
+                }
                 
                 var lName = rows[0]["LastName"];
                 if (fName is System.DBNull)
+                {
                     this.textBoxLastName.Text = "No First Name";
+                }
                 else
+                {
                     this.textBoxLastName.Text = (string)lName;
+                    labelText.Append((string)lName);
+                    labelText.Append(" ");
+                }
                 
-                var title = rows[0]["Title"];
-                if (title is System.DBNull)
-                    this.textBoxTitle.Text = "No Title";
-                else
-                    this.textBoxTitle.Text = (string)title;
+                
                 
                 DateTime dob = (DateTime)rows[0]["DOB"];
                 int age = DateTime.Now.Year - dob.Year;
                 this.TextBoxAge.Text = age.ToString();
-
-                this.TextBoxDateOfBirth.Text = dob.Date.ToShortDateString();
-
-                DataTable tempDataTable = new DataTable();
-                DataColumn dCol = new DataColumn("Phone",typeof(string));
-                tempDataTable.Columns.Add(dCol);
-                DataRow rowFromTempDataTable = tempDataTable.NewRow();
-                rowFromTempDataTable["Phone"] = rowsWithPhone[0]["PhoneNumber"];
-                tempDataTable.Rows.Add(rowFromTempDataTable);
-                this.GridViewTypeEmailNote.DataSource = tempDataTable;
-                this.GridViewTypeEmailNote.DataBind();
+                this.TitleFNameLName.Text = labelText.ToString();
+                this.TextBoxDateOfBirth.Text = dob.Date.ToShortDateString();                
             }
             else
             {
+                this.TitleFNameLName.Text = "";
                 this.textBoxFirstName.Text = "No member";
                 this.textBoxFirstName.Text = "No member";
                 this.textBoxLastName.Text = "No member";
@@ -99,6 +114,31 @@ namespace TestTask
                 this.TextBoxAge.Text = "No member";
 
                 this.TextBoxDateOfBirth.Text = "No member";
+            }
+
+            DataTable tempDataTable = new DataTable();
+            DataColumn dCol0 = new DataColumn("Type", typeof(string));
+            DataColumn dCol1 = new DataColumn("Phone", typeof(string));
+            DataColumn dCol2 = new DataColumn("Note", typeof(string));
+            tempDataTable.Columns.AddRange(new DataColumn[] { dCol0, dCol1, dCol2 });
+            DataRow rowFromTempDataTable = tempDataTable.NewRow();
+            if (rowsWithPhone.Length != 0)
+            {                
+                rowFromTempDataTable["Phone"] = rowsWithPhone[0]["PhoneNumber"];
+                rowFromTempDataTable["Type"] = rowsWithPhone[0]["Type"];
+                rowFromTempDataTable["Note"] = rowsWithPhone[0]["Note"];
+                tempDataTable.Rows.Add(rowFromTempDataTable);
+                this.GridViewTypeEmailNote.DataSource = tempDataTable;
+                this.GridViewTypeEmailNote.DataBind(); 
+            }
+            else
+            {
+                rowFromTempDataTable["Phone"] = "No Number";
+                rowFromTempDataTable["Type"] = "No Type";
+                rowFromTempDataTable["Note"] = "No Note";
+                tempDataTable.Rows.Add(rowFromTempDataTable);
+                this.GridViewTypeEmailNote.DataSource = tempDataTable;
+                this.GridViewTypeEmailNote.DataBind(); 
             }
 
         }
